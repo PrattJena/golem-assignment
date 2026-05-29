@@ -1,10 +1,12 @@
 from dotenv import load_dotenv
+load_dotenv()
+
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
 
-load_dotenv()
+
 
 
 class Part(BaseModel):

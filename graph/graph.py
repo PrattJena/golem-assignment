@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
-from langgraph.graph import END, StateGraph, START
+load_dotenv()
 
+from langgraph.graph import END, StateGraph, START
 from graph.consts import GENERATE_SQL, EXECUTE_SQL, RECOMMEND
 from graph.nodes.generate import generate_sql_node
 from graph.nodes.execute import execute_sql
@@ -8,7 +9,7 @@ from graph.nodes.recommend import recommend
 from graph.state import GraphState
 
 
-load_dotenv()
+
 
 MAX_ATTEMPTS = 3
 

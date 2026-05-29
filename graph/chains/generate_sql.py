@@ -1,11 +1,13 @@
 from dotenv import load_dotenv
+load_dotenv()
+
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 from graph.utils.get_inventory_context import get_inventory_context
 
 
-load_dotenv()
+
 
 class SQLQuery(BaseModel):
     """

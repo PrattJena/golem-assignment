@@ -222,3 +222,4 @@ __marimo__/
 # Database
 inventory.db
 auto_parts_catalog.csv
+.DS_Store
