@@ -3,7 +3,7 @@ load_dotenv()
 
 from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_openai import ChatOpenAI
+from graph.utils.llm import llm
 from graph.utils.get_inventory_context import get_inventory_context
 
 
@@ -38,7 +38,6 @@ Rules:
     - Include out-of-stock items. Do not filter on stock_quantity.
     """
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
 structured_llm = llm.with_structured_output(SQLQuery)
 schema, sample_rows = get_inventory_context()
 

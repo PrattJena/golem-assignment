@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 load_dotenv()
 
-from langchain_openai import ChatOpenAI
+from graph.utils.llm import llm
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 from typing import List
@@ -39,7 +39,6 @@ Rules:
     - If the question is unrelated to auto parts or vehicles, do not answer it. Simply say you can only help with auto parts and ask the customer to describe their vehicle issue.
 """
 
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
 structured_llm = llm.with_structured_output(Recommendation)
 
 prompt = ChatPromptTemplate.from_messages([
