@@ -26,7 +26,8 @@ def execute_sql(state: GraphState)-> Dict[str, Any]:
     conn = None
     
     try:
-        conn = sqlite3.connect(os.getenv("INVENTORY_DB_PATH"))
+        db_path = os.getenv("INVENTORY_DB_PATH")
+        conn = sqlite3.connect(f"file:{db_path}?mode=ro", uri=True)
         cursor = conn.cursor()
         cursor.execute(sql_query)
         rows = cursor.fetchall()
