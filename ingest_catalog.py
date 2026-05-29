@@ -41,6 +41,9 @@ def init_database():
     print("\n--- Test Query Results ---")
     for row in rows:
         print(row)
+    
+    print("=" * 50)
+    
 
     conn.close()
 
