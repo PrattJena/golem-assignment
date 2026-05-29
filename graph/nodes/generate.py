@@ -10,6 +10,7 @@ def generate_sql_node(state: GraphState) -> Dict[str, Any]:
     """
     question = state["question"]
     error_message = state.get("error_message", "")
+    retry_count = state.get("retry_count", 0)
     
     if error_message:
         question = f"""The previous SQL query failed with this error:
@@ -21,4 +22,5 @@ def generate_sql_node(state: GraphState) -> Dict[str, Any]:
     return {
         "sql_query": result.sql_query,
         "error_message": "",
+        "retry_count": retry_count + 1
     }

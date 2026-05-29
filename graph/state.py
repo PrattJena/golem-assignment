@@ -11,6 +11,7 @@ class GraphState(TypedDict):
         error_message: Error message if the generated SQL query is invalid or fails to execute.
         query_results: Product rows returned from the SQLite database.
         generation: Final natural-language response shown to the user.
+        retry_count: Number of SQL generation attempts. Used to prevent infinite retry loops.
     """
 
     question: str
@@ -18,3 +19,4 @@ class GraphState(TypedDict):
     error_message: str
     query_results: List[Dict]
     generation: str
+    retry_count: int
