@@ -218,3 +218,7 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Database
+inventory.db
+auto_parts_catalog.csv
