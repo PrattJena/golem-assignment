@@ -20,18 +20,14 @@ Response
 
 ![Graph](graph.png)
 
-### Architecture & Workflow
-
-1. **Dual-Hat SQL Generation & Self-Correction:** The LLM first acts as an automotive technician to map customer symptoms to parts (e.g., _squealing brakes_ → brake pads), then dynamically generates the corresponding SQL query.
-   - **Retry Loop:** If the generated SQL contains syntax errors or fails execution, the graph routes back to the LLM with the error trace for an automatic retry/self-healing step.
-
-2. **Contextual Recommendation:** A separate downstream step ingests the final, validated SQL query results to rank available products and formulate a polished, customer-facing response with clear automotive reasoning.
+## Setup
 
 ### Prerequisites
 
 - Python 3.11+
 - [uv](https://docs.astral.sh/uv/) package manager
 - OpenAI API key (default) or [Ollama](https://ollama.com/) for local models
+- Google Cloud service account with Google Sheets API enabled
 
 ### Installation
 
@@ -44,19 +40,47 @@ uv sync
 
 # Set up environment variables
 cp .env.example .env
-# Edit .env and add your API key + model preferences
-# LLM_PROVIDER=openai (default) or ollama
-# LLM_MODEL=gpt-4o (default) or any supported model
-
-# Initialize the database
-uv run python ingest_catalog.py
+# Edit .env and add:
+#   OPENAI_API_KEY            — your OpenAI key
+#   LLM_PROVIDER              — openai (default) or ollama
+#   LLM_MODEL                 — gpt-4o (default) or any supported model
+#   GOOGLE_SHEETS_CREDENTIALS_PATH — path to your service account JSON
+#   GOOGLE_SHEET_ID           — the sheet ID from the Google Sheet URL
+#   INVENTORY_DB_PATH         — inventory.db (default)
 ```
+
+### Google Sheets Service Account Setup
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a project (or use an existing one)
+3. Enable the **Google Sheets API**
+4. Go to **IAM & Admin → Service Accounts** → Create a service account
+5. Download the JSON key file and save it as `service_account.json` in the project root
+6. Open the Google Sheet → **Share** → paste the service account `client_email` → set to **Viewer**
 
 ### Run
 
 ```bash
 uv run python main.py
 ```
+
+The app syncs inventory from Google Sheets on every startup before accepting queries.
+
+### Switching LLMs
+
+The LLM is configured via `LLM_PROVIDER` and `LLM_MODEL` in `.env`. Both chains (SQL generation and recommendation) share a single LLM instance defined in `graph/utils/llm.py`. To switch models, just update `.env`:
+
+```bash
+# OpenAI
+LLM_PROVIDER=openai
+LLM_MODEL=gpt-4o
+
+# Ollama (local)
+LLM_PROVIDER=ollama
+LLM_MODEL=qwen3.5:2b
+```
+
+No code changes needed.
 
 ## Google Sheet
 
@@ -84,9 +108,10 @@ golem-assignment/
 │   ├── consts.py                 # Node name constants
 │   ├── graph.py                  # StateGraph wiring + conditional edges
 │   └── state.py                  # Custom GraphState (TypedDict)
-├── ingest_catalog.py             # CSV → SQLite with explicit schema
-├── main.py                       # Entry point
-├── auto_parts_catalog.csv        # Product catalog (30 items)
+├── ingestion/
+│   └── sync_catalog.py           # Google Sheets → SQLite sync
+├── main.py                       # Entry point (syncs data, then runs graph)
+├── service_account.json          # Google service account credentials (gitignored)
 └── pyproject.toml
 ```
 
@@ -98,6 +123,12 @@ The assignment offered two ways to read from Google Sheets: a public CSV export 
 
 The tradeoff is a bit more setup, but it is closer to a real production workflow. In production, this approach also gives better control over access, credential rotation, and auditing.
 
+- ### Sync Strategy
+
+  The app re-syncs from Google Sheets on startup. This keeps the local SQLite database fresh at the beginning of each session without calling the Sheets API on every user query.
+
+  For production, I would use a TTL-based refresh, such as re-syncing only if the cached data is older than 15 minutes, or a background sync job that updates inventory on a schedule.
+
 ### Q2) Why Separate Chains and Nodes
 
 I separated chains from nodes to keep the code modular and easier to test. Chains define the LLM behavior, such as the prompt, model, and structured output. Nodes handle graph specific logic, such as reading state, passing inputs to chains, formatting SQL results, and returning state updates.
@@ -108,7 +139,7 @@ This keeps the LLM prompts reusable while keeping state management inside the gr
 
 The assignment offered a few possible approaches. I chose Option A, where the LLM generates SQL directly from the user’s natural language question.
 
-I considered Option B, where the LLM returns structured filters like category, keywords, or price range and the code builds the SQL. That is safer, but it limits the search to fields I define upfront. I also considered a hybrid approac (Option C) where one step extracts intent and another generates SQL, but that adds another node and LLM call.
+I considered Option B, where the LLM returns structured filters like category, keywords, or price range and the code builds the SQL. That is safer, but it limits the search to fields I define upfront. I also considered a hybrid approach (Option C) where one step extracts intent and another generates SQL, but that adds another node and LLM call.
 
 For this project, Option A felt like the best tradeoff. Auto-parts questions can be vague, like “I’m doing a winter road trip from Boston to Montreal,” where the user may need batteries, wipers, antifreeze, or tires. Letting the LLM generate SQL directly allows it to reason from symptoms to relevant parts in one step, while LangGraph still handles the execution and retry flow around it.
 
