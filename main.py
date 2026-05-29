@@ -5,7 +5,7 @@ from graph.graph import app
 
 
 def main():
-    question = "My car doesn't start in the winter"
+    question = input("Enter your question:\n")
     
     result = app.invoke({"question": question})
     
