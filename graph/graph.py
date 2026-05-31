@@ -48,7 +48,5 @@ workflow.add_conditional_edges(
 
 workflow.add_edge(RECOMMEND, END)
 
-app = workflow.compile()
-
 if __name__ == "__main__":
-    app.get_graph().draw_mermaid_png(output_file_path="graph.png")
+    workflow.compile().get_graph().draw_mermaid_png(output_file_path="graph.png")

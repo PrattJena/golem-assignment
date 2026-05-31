@@ -1,4 +1,6 @@
-from typing import List, Dict, TypedDict
+from typing import List, Dict, TypedDict, Annotated
+from langchain_core.messages import AnyMessage
+from langgraph.graph.message import add_messages
 
 
 class GraphState(TypedDict):
@@ -12,6 +14,7 @@ class GraphState(TypedDict):
         query_results: Product rows returned from the SQLite database.
         generation: Final natural-language response shown to the user.
         retry_count: Number of SQL generation attempts. Used to prevent infinite retry loops.
+        messages: Conversation history between the user and the assistant.
     """
 
     question: str
@@ -20,3 +23,4 @@ class GraphState(TypedDict):
     query_results: List[Dict]
     generation: str
     retry_count: int
+    messages: Annotated[list[AnyMessage], add_messages]

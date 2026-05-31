@@ -13,6 +13,7 @@ class Part(BaseModel):
     name: str = Field(description="Name of the auto part")
     price: float = Field(description="Price of the auto part")
     stock_status: str = Field(description="'In Stock' or 'Out of Stock'")
+    vehicle_compatibility: str = Field(description="Vehicle compatibility information")
     reasoning: str = Field(description="Why this auto part fits the customer's problem")
 
 
@@ -37,6 +38,7 @@ Rules:
     - Rank by relevance to the customer's problem, not by price.
     - If no products are found, return an empty parts list. In the summary, explain what type of part the customer likely needs, clearly say that no matching product was found in the current inventory, and suggest they try describing the problem differently.
     - If the question is unrelated to auto parts or vehicles, do not answer it. Simply say you can only help with auto parts and ask the customer to describe their vehicle issue.
+    - If the best product for the customer's need is out of stock or incompatible, explicitly mention the closest alternative from the results, even if it falls outside the top 3.
 """
 
 structured_llm = llm.with_structured_output(Recommendation)

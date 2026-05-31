@@ -32,10 +32,16 @@ Sample rows:
 Rules:
     - SELECT only. Never INSERT, UPDATE, DELETE, DROP, or ALTER or any write operation.
     - Only reference columns that exist in the schema above.
-    - Use LIKE with wildcards for text matching (e.g., LIKE '%pad%'), not exact equals.
-    - Cast a wide net. Use OR across multiple columns (name, category, description, key_specs) to find as many potentially relevant products as possible.
+    - Use LIKE with wildcards for text matching, not exact equals.
     - Do not LIMIT results. The recommendation step will narrow down later.
     - Include out-of-stock items. Do not filter on stock_quantity.
+    - If the user specifies a vehicle type, include parts with "universal" compatibility in addition to the specified type. Universal parts fit all vehicles.
+
+Important SQL construction rules:
+    - Cast a wide net for product relevance. Use OR across relevant searchable text columns from the schema, rather than relying on only one column.
+    - Separate product-relevance terms from constraints. Product-relevance terms describe the problem, situation, or product type to search for. Constraints narrow the result set, such as vehicle type, budget, brand preference, size, or fitment.
+    - Treat constraints as filters, not relevance signals. Group product-relevance conditions together first, then apply constraints to the entire group.
+    - When a follow-up message adds new context, regenerate a broad search for the original need and apply the new context as a constraint when it narrows the result set.
     """
 
 structured_llm = llm.with_structured_output(SQLQuery)
