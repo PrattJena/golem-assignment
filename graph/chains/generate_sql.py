@@ -29,6 +29,7 @@ Schema:
 Sample rows:
     {sample_rows}
 
+
 Rules:
     - SELECT only. Never INSERT, UPDATE, DELETE, DROP, or ALTER or any write operation.
     - Only reference columns that exist in the schema above.
@@ -39,9 +40,8 @@ Rules:
 
 Important SQL construction rules:
     - Cast a wide net for product relevance. Use OR across relevant searchable text columns from the schema, rather than relying on only one column.
-    - Separate product-relevance terms from constraints. Product-relevance terms describe the problem, situation, or product type to search for. Constraints narrow the result set, such as vehicle type, budget, brand preference, size, or fitment.
+    - Separate product-relevance terms from constraints. Product-relevance terms describe the problem, situation, or product type to search for. Constraints narrow the result set, such as vehicle type, budget, brand preference, size, fitment etc.
     - Treat constraints as filters, not relevance signals. Group product-relevance conditions together first, then apply constraints to the entire group.
-    - When a follow-up message adds new context, regenerate a broad search for the original need and apply the new context as a constraint when it narrows the result set.
     """
 
 structured_llm = llm.with_structured_output(SQLQuery)

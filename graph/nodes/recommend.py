@@ -48,4 +48,4 @@ def recommend(state: GraphState) -> Dict[str, Any]:
         output += f"{i}. {part.name} — ${part.price}, {part.stock_status} | {part.vehicle_compatibility}\n"
         output += f"   {part.reasoning}\n\n"
 
-    return {"generation": output.strip(), "messages": [AIMessage(content=output.strip())],}
+    return {"generation": output.strip(), "messages": [AIMessage(content=result.summary)]}

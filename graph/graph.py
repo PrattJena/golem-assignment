@@ -2,7 +2,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from langgraph.graph import END, StateGraph, START
-from graph.consts import GENERATE_SQL, EXECUTE_SQL, RECOMMEND
+from graph.consts import GENERATE_SQL, EXECUTE_SQL, RECOMMEND, RESOLVE_QUERY
+from graph.nodes.resolve import resolve_query_node
 from graph.nodes.generate import generate_sql_node
 from graph.nodes.execute import execute_sql
 from graph.nodes.recommend import recommend
@@ -12,6 +13,15 @@ from graph.state import GraphState
 
 
 MAX_ATTEMPTS = 3
+
+def route_after_resolve(state: GraphState) -> str:
+    """
+    Route off topic questions directly to END.
+    Route auto parts questions to SQL generation.
+    """
+    if state.get("intent") == "off_topic":
+        return END
+    return GENERATE_SQL
 
 
 def route_after_execute(state: GraphState) -> str:
@@ -30,11 +40,22 @@ def route_after_execute(state: GraphState) -> str:
 
 workflow = StateGraph(GraphState)
 
+workflow.add_node(RESOLVE_QUERY, resolve_query_node)
 workflow.add_node(GENERATE_SQL, generate_sql_node)
 workflow.add_node(EXECUTE_SQL, execute_sql)
 workflow.add_node(RECOMMEND, recommend)
 
-workflow.add_edge(START, GENERATE_SQL)
+workflow.add_edge(START, RESOLVE_QUERY)
+
+workflow.add_conditional_edges(
+    RESOLVE_QUERY,
+    route_after_resolve,
+    {
+        GENERATE_SQL: GENERATE_SQL,
+        END: END,
+    },
+)
+
 workflow.add_edge(GENERATE_SQL, EXECUTE_SQL)
 
 workflow.add_conditional_edges(
