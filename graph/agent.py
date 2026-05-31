@@ -8,24 +8,22 @@ from graph.graph import workflow
 
 
 conn = sqlite3.connect("checkpoints.db", check_same_thread=False)
-memory = SqliteSaver(conn)
-app = workflow.compile(checkpointer=memory)
+persistent = SqliteSaver(conn)
+app = workflow.compile(checkpointer=persistent)
 
 
-def run_agent(question: str, thread_id: str) -> Dict[str, Any]:
+def stream_agent(question: str, thread_id: str):
     """
-    Run the auto-parts advisor graph for a specific conversation thread.
-
-    Same thread_id = continue existing conversation.
-    New thread_id = start a separate conversation.
+    Yields (node_name, output) tuples as each node completes.
     """
     config = {"configurable": {"thread_id": thread_id}}
-
-    return app.invoke(
+    for step in app.stream(
         {
             "question": question,
             "messages": [HumanMessage(content=question)],
             "retry_count": 0,
         },
         config,
-    )
+    ):
+        for node_name, output in step.items():
+            yield node_name, output
