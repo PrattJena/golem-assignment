@@ -1,9 +1,12 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from typing import Literal
-from pydantic import BaseModel, Field
+
 from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
+
 from graph.utils.llm import llm
 
 
@@ -19,6 +22,7 @@ class ResolvedQuery(BaseModel):
     resolved_question: str = Field(
         description="Standalone auto parts request. Empty string if the latest user message is off topic."
     )
+
 
 SYSTEM_PROMPT = """You classify and rewrite customer messages for an auto parts advisor.
 Your job:
@@ -40,9 +44,14 @@ Rules:
 - Do not answer auto parts questions here.
 """
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", SYSTEM_PROMPT),
-    ("human", "Previous resolved auto-parts request:\n{previous_resolved_question}\n\nConversation history:\n{history}\n\nLatest user message:\n{question}"),
-])
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        (
+            "human",
+            "Previous resolved auto-parts request:\n{previous_resolved_question}\n\nConversation history:\n{history}\n\nLatest user message:\n{question}",
+        ),
+    ]
+)
 
 resolve_query_chain = prompt | llm.with_structured_output(ResolvedQuery)

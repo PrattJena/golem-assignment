@@ -1,14 +1,17 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from ingestion.sync_catalog import init_database
+
 init_database()
 
 import uuid
+
 import chainlit as cl
+
 from graph.agent import stream_agent
 from graph.chains.stream_response import stream_response_chain
-
 
 step_labels = {
     "resolve_query": "Understanding your question...",
@@ -25,6 +28,7 @@ async def on_chat_start():
     await cl.Message(
         content="Hi! I can help you find auto parts. Describe your vehicle issue or what you need."
     ).send()
+
 
 @cl.on_message
 async def on_message(message: cl.Message):
@@ -58,9 +62,11 @@ async def on_message(message: cl.Message):
 
     question = resolved_question or message.content
     msg = cl.Message(content="")
-    async for chunk in stream_response_chain.astream({
-        "question": question,
-        "recommendations": generation,
-    }):
+    async for chunk in stream_response_chain.astream(
+        {
+            "question": question,
+            "recommendations": generation,
+        }
+    ):
         await msg.stream_token(chunk)
     await msg.send()

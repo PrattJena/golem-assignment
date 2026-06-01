@@ -1,13 +1,17 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from ingestion.sync_catalog import init_database
+
 init_database()
 
 import sqlite3
-from graph.graph import workflow
-from langgraph.checkpoint.sqlite import SqliteSaver
+
 from langchain_core.messages import HumanMessage
+from langgraph.checkpoint.sqlite import SqliteSaver
+
+from graph.graph import workflow
 
 
 def main():
@@ -31,7 +35,7 @@ def main():
             {
                 "question": question,
                 "messages": [HumanMessage(content=question)],
-                "retry_count": 0
+                "retry_count": 0,
             },
             config,
         )

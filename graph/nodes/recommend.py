@@ -1,7 +1,9 @@
-from typing import Dict, Any, List
-from graph.state import GraphState
-from graph.chains.recommend_parts import recommend_chain
+from typing import Any, Dict, List
+
 from langchain_core.messages import AIMessage
+
+from graph.chains.recommend_parts import recommend_chain
+from graph.state import GraphState
 
 
 def format_query_results(query_results: List[Dict[str, Any]]) -> str:
@@ -32,10 +34,12 @@ def recommend(state: GraphState) -> Dict[str, Any]:
 
     formatted = format_query_results(query_results)
 
-    result = recommend_chain.invoke({
-        "question": question,
-        "query_results": formatted,
-    })
+    result = recommend_chain.invoke(
+        {
+            "question": question,
+            "query_results": formatted,
+        }
+    )
 
     output = f"{result.summary}\n\n"
     for i, part in enumerate(result.parts, 1):

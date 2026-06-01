@@ -1,7 +1,7 @@
-from typing import Dict, Any
+from typing import Any, Dict
 
-from graph.state import GraphState
 from graph.chains.generate_sql import generate_sql_chain
+from graph.state import GraphState
 
 
 def generate_sql_node(state: GraphState) -> Dict[str, Any]:
@@ -11,7 +11,7 @@ def generate_sql_node(state: GraphState) -> Dict[str, Any]:
     question = state.get("resolved_question") or state["question"]
     error_message = state.get("error_message", "")
     retry_count = state.get("retry_count", 0)
-    
+
     print(f"\n--- QUESTION SENT TO SQL LLM ---\n{question}\n--- END QUESTION ---\n")
 
     if error_message:
@@ -20,7 +20,7 @@ def generate_sql_node(state: GraphState) -> Dict[str, Any]:
         The previous SQL query failed with this error:
         Error: {error_message}
         Please fix the SQL query and try again."""
-    
+
     try:
         result = generate_sql_chain.invoke({"question": question})
     except Exception as e:
@@ -30,9 +30,9 @@ def generate_sql_node(state: GraphState) -> Dict[str, Any]:
             "query_results": [],
             "retry_count": retry_count + 1,
         }
-    
+
     print(f"\n--- GENERATED SQL ---\n{result.sql_query}\n--- END SQL ---\n")
-    
+
     return {
         "sql_query": result.sql_query,
         "error_message": "",

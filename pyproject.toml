@@ -8,6 +8,7 @@ dependencies = [
     "black>=26.5.1",
     "chainlit>=2.11.1",
     "gspread>=6.2.1",
+    "isort>=8.0.1",
     "langchain>=1.3.2",
     "langchain-ollama>=1.1.0",
     "langchain-openai>=1.2.2",

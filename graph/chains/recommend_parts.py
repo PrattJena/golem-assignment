@@ -1,12 +1,13 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from graph.utils.llm import llm
-from langchain_core.prompts import ChatPromptTemplate
-from pydantic import BaseModel, Field
 from typing import List
 
+from langchain_core.prompts import ChatPromptTemplate
+from pydantic import BaseModel, Field
 
+from graph.utils.llm import llm
 
 
 class Part(BaseModel):
@@ -21,7 +22,10 @@ class Recommendation(BaseModel):
     """
     Ranked auto part recommendations for the customer based on their problem.
     """
-    parts: List[Part] = Field(description="Top 2-3 recommended auto parts, ranked by relevance")
+
+    parts: List[Part] = Field(
+        description="Top 2-3 recommended auto parts, ranked by relevance"
+    )
     summary: str = Field(description="Overall advice to the customer")
 
 
@@ -43,9 +47,11 @@ Rules:
 
 structured_llm = llm.with_structured_output(Recommendation)
 
-prompt = ChatPromptTemplate.from_messages([
-    ("system", SYSTEM_PROMPT),
-    ("human", "Customer question: {question}\n\nProducts found:\n{query_results}"),
-])
+prompt = ChatPromptTemplate.from_messages(
+    [
+        ("system", SYSTEM_PROMPT),
+        ("human", "Customer question: {question}\n\nProducts found:\n{query_results}"),
+    ]
+)
 
 recommend_chain = prompt | structured_llm

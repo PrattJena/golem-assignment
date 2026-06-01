@@ -1,12 +1,12 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from pydantic import BaseModel, Field
 from langchain_core.prompts import ChatPromptTemplate
-from graph.utils.llm import llm
+from pydantic import BaseModel, Field
+
 from graph.utils.get_inventory_context import get_inventory_context
-
-
+from graph.utils.llm import llm
 
 
 class SQLQuery(BaseModel):
@@ -17,6 +17,7 @@ class SQLQuery(BaseModel):
     sql_query: str = Field(
         description="The SQLite SELECT query generated for retrieving candidate products from the inventory table."
     )
+
 
 SYSTEM_PROMPT = """You are an expert auto parts advisor and SQL specialist. 
 Your job is to listen to a customer's vague symptoms or needs, figure out what kind of parts they require, and query the inventory database to find them.
@@ -62,5 +63,7 @@ prompt = ChatPromptTemplate.from_messages(
 generate_sql_chain = prompt | structured_llm
 
 if __name__ == "__main__":
-    result = generate_sql_chain.invoke({"question": "My car makes a squealing noise when I brake — what do I need?"})
+    result = generate_sql_chain.invoke(
+        {"question": "My car makes a squealing noise when I brake — what do I need?"}
+    )
     print(result)

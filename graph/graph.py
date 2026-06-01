@@ -1,18 +1,18 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
-from langgraph.graph import END, StateGraph, START
-from graph.consts import GENERATE_SQL, EXECUTE_SQL, RECOMMEND, RESOLVE_QUERY
-from graph.nodes.resolve import resolve_query_node
-from graph.nodes.generate import generate_sql_node
+from langgraph.graph import END, START, StateGraph
+
+from graph.consts import EXECUTE_SQL, GENERATE_SQL, RECOMMEND, RESOLVE_QUERY
 from graph.nodes.execute import execute_sql
+from graph.nodes.generate import generate_sql_node
 from graph.nodes.recommend import recommend
+from graph.nodes.resolve import resolve_query_node
 from graph.state import GraphState
 
-
-
-
 MAX_ATTEMPTS = 3
+
 
 def route_after_resolve(state: GraphState) -> str:
     """

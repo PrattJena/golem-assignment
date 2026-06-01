@@ -1,13 +1,13 @@
 from dotenv import load_dotenv
+
 load_dotenv()
 
 import uuid
-from typing import Dict, Any
+from typing import Any, Dict
 
 import streamlit as st
 
 from ingestion.sync_catalog import init_database
-
 
 st.set_page_config(
     page_title="Auto Parts Advisor",
@@ -24,8 +24,8 @@ def bootstrap_app():
     Handles secrets for Streamlit Cloud deployment.
     """
     import json
-    import tempfile
     import os
+    import tempfile
 
     # Handle Google service account from Streamlit Secrets
     if "GOOGLE_SERVICE_ACCOUNT" in st.secrets:
@@ -36,14 +36,20 @@ def bootstrap_app():
         os.environ["GOOGLE_SHEETS_CREDENTIALS_PATH"] = tmp.name
 
     # Set env vars from Streamlit Secrets
-    for key in ["OPENAI_API_KEY", "GOOGLE_SHEET_ID", "INVENTORY_DB_PATH",
-                 "LLM_MODEL", "LLM_PROVIDER"]:
+    for key in [
+        "OPENAI_API_KEY",
+        "GOOGLE_SHEET_ID",
+        "INVENTORY_DB_PATH",
+        "LLM_MODEL",
+        "LLM_PROVIDER",
+    ]:
         if key in st.secrets and key not in os.environ:
             os.environ[key] = st.secrets[key]
 
     init_database()
     from graph.agent import stream_agent
     from graph.chains.stream_response import stream_response_chain
+
     return stream_agent, stream_response_chain
 
 
@@ -139,7 +145,9 @@ for chat_id, chat in reversed(list(st.session_state.chats.items())):
 current_chat = get_current_chat()
 
 st.title("🚗 Auto Parts Advisor")
-st.caption("Describe a vehicle issue, trip, or part need. I'll search the inventory and recommend relevant products.")
+st.caption(
+    "Describe a vehicle issue, trip, or part need. I'll search the inventory and recommend relevant products."
+)
 
 for msg in current_chat["messages"]:
     with st.chat_message(msg["role"]):
@@ -165,7 +173,9 @@ if user_prompt := st.chat_input("Describe your vehicle issue or what you need...
 
         elif not should_stream:
             st.markdown(generation)
-            current_chat["messages"].append({"role": "assistant", "content": generation})
+            current_chat["messages"].append(
+                {"role": "assistant", "content": generation}
+            )
 
         else:
             question = resolved_question or user_prompt
@@ -173,21 +183,27 @@ if user_prompt := st.chat_input("Describe your vehicle issue or what you need...
             full_response = ""
 
             try:
-                for chunk in stream_response_chain.stream({
-                    "question": question,
-                    "recommendations": generation,
-                }):
+                for chunk in stream_response_chain.stream(
+                    {
+                        "question": question,
+                        "recommendations": generation,
+                    }
+                ):
                     full_response += chunk
                     response_placeholder.markdown(full_response)
 
-                current_chat["messages"].append({
-                    "role": "assistant",
-                    "content": full_response,
-                })
+                current_chat["messages"].append(
+                    {
+                        "role": "assistant",
+                        "content": full_response,
+                    }
+                )
 
             except Exception:
                 response_placeholder.markdown(generation)
-                current_chat["messages"].append({
-                    "role": "assistant",
-                    "content": generation,
-                })
+                current_chat["messages"].append(
+                    {
+                        "role": "assistant",
+                        "content": generation,
+                    }
+                )

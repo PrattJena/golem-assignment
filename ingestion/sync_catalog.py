@@ -1,5 +1,6 @@
 import os
 import sqlite3
+
 import gspread
 import pandas as pd
 from dotenv import load_dotenv
@@ -51,7 +52,7 @@ def init_database():
     print("\n--- Test Query Results ---")
     for row in rows:
         print(row)
-    
+
     print("=" * 50)
 
     conn.close()

@@ -1,4 +1,5 @@
 import os
+
 from langchain.chat_models import init_chat_model
 
 model_name = os.getenv("LLM_MODEL")

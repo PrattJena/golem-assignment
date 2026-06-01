@@ -6,7 +6,6 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 
 from graph.graph import workflow
 
-
 conn = sqlite3.connect("checkpoints.db", check_same_thread=False)
 persistent = SqliteSaver(conn)
 app = workflow.compile(checkpointer=persistent)
