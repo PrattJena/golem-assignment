@@ -178,32 +178,32 @@ if user_prompt := st.chat_input("Describe your vehicle issue or what you need...
             )
 
         else:
-            question = resolved_question or user_prompt
-            response_placeholder = st.empty()
-            full_response = ""
+            if "No products found" in generation or not any(
+                line.strip().startswith(("1.", "2.", "3.")) for line in generation.split("\n")
+            ):
+                st.markdown(generation)
+                current_chat["messages"].append({"role": "assistant", "content": generation})
+            else:
+                question = resolved_question or user_prompt
+                response_placeholder = st.empty()
+                full_response = ""
 
-            try:
-                for chunk in stream_response_chain.stream(
-                    {
+                try:
+                    for chunk in stream_response_chain.stream({
                         "question": question,
                         "recommendations": generation,
-                    }
-                ):
-                    full_response += chunk
-                    response_placeholder.markdown(full_response)
+                    }):
+                        full_response += chunk
+                        response_placeholder.markdown(full_response)
 
-                current_chat["messages"].append(
-                    {
+                    current_chat["messages"].append({
                         "role": "assistant",
                         "content": full_response,
-                    }
-                )
+                    })
 
-            except Exception:
-                response_placeholder.markdown(generation)
-                current_chat["messages"].append(
-                    {
+                except Exception:
+                    response_placeholder.markdown(generation)
+                    current_chat["messages"].append({
                         "role": "assistant",
                         "content": generation,
-                    }
-                )
+                    })
