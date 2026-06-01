@@ -25,16 +25,10 @@ def format_query_results(query_results: List[Dict[str, Any]]) -> str:
 
 def recommend(state: GraphState) -> Dict[str, Any]:
     """
-    Takes query results and the original question, produces a ranked recommendation string for the customer.
+    Takes query results and the resolved question, produces a ranked recommendation string for the customer.
     """
-    question = state["question"]
+    question = state.get("resolved_question") or state["question"]
     query_results = state.get("query_results", [])
-    messages = state.get("messages", [])
-
-    if len(messages) > 1:
-        # Could limit the history to last 5 messages to save tokens but conversations will not be that long.
-        history = "\n".join([f"{m.type}: {m.content}" for m in messages[:-1]])
-        question = f"Conversation so far:\n{history}\n\nCurrent question: {question}"
 
     formatted = format_query_results(query_results)
 
@@ -48,4 +42,14 @@ def recommend(state: GraphState) -> Dict[str, Any]:
         output += f"{i}. {part.name} — ${part.price}, {part.stock_status} | {part.vehicle_compatibility}\n"
         output += f"   {part.reasoning}\n\n"
 
-    return {"generation": output.strip(), "messages": [AIMessage(content=result.summary)]}
+    assistant_memory = result.summary + "\n\nOptions shown:\n"
+    for i, part in enumerate(result.parts, 1):
+        assistant_memory += (
+            f"{i}. {part.name} — ${part.price}, "
+            f"{part.stock_status} | {part.vehicle_compatibility}\n"
+        )
+
+    return {
+        "generation": output.strip(),
+        "messages": [AIMessage(content=assistant_memory.strip())],
+    }

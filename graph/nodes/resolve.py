@@ -14,7 +14,7 @@ def resolve_query_node(state: GraphState) -> Dict[str, Any]:
     """
     question = state["question"]
     messages = state.get("messages", [])
-
+    previous_resolved_question = state.get("resolved_question", "")
     history_messages = messages[:-1]
 
     history = "\n".join(
@@ -24,6 +24,7 @@ def resolve_query_node(state: GraphState) -> Dict[str, Any]:
 
     result = resolve_query_chain.invoke(
         {
+            "previous_resolved_question": previous_resolved_question,
             "history": history,
             "question": question,
         }

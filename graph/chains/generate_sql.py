@@ -40,8 +40,10 @@ Rules:
 
 Important SQL construction rules:
     - Cast a wide net for product relevance. Use OR across relevant searchable text columns from the schema, rather than relying on only one column.
+    - Use automotive knowledge to expand broad customer situations into concrete product families. Do not rely only on exact words from the request.
     - Separate product-relevance terms from constraints. Product-relevance terms describe the problem, situation, or product type to search for. Constraints narrow the result set, such as vehicle type, budget, brand preference, size, fitment etc.
     - Treat constraints as filters, not relevance signals. Group product-relevance conditions together first, then apply constraints to the entire group.
+    - When the request contains a broad situation plus a constraint, preserve the broad product search and apply the constraint as a filter.
     """
 
 structured_llm = llm.with_structured_output(SQLQuery)
