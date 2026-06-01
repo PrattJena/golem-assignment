@@ -37,7 +37,7 @@ Rules:
     - Use LIKE with wildcards for text matching, not exact equals.
     - Do not LIMIT results. The recommendation step will narrow down later.
     - Include out-of-stock items. Do not filter on stock_quantity.
-    - If the user specifies a vehicle type, include parts with "universal" compatibility in addition to the specified type. Universal parts fit all vehicles.
+    - Do not assume vehicle type unless explicitly stated. If the user specifies a vehicle type, include parts with "universal" compatibility in addition to the specified type. Universal parts fit all vehicles.
 
 Important SQL construction rules:
     - Cast a wide net for product relevance. Use OR across relevant searchable text columns from the schema, rather than relying on only one column.
