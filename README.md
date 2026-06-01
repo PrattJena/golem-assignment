@@ -2,23 +2,27 @@
 
 An LLM-powered auto parts advisor built with LangGraph. A customer describes their car problem in plain language, and the agent identifies relevant parts from an inventory database, then returns ranked recommendations with explanations. Supports multi-turn conversation, off-topic filtering, and real-time token streaming.
 
+**Live Demo:** [golem-assignment.streamlit.app](https://golem-assignment.streamlit.app/)
+
 ## How It Works
 
+```
 User Question
-↓
+    ↓
 Resolve Query (classify intent + rewrite follow-ups into standalone questions)
-↓
-off-topic? → respond and END
-↓
+    ↓
+  off-topic? → respond and end
+    ↓
 Generate SQL (LLM reasons about the problem → writes SQL)
-↓
+    ↓
 Execute SQL (runs query against SQLite)
-↓
-error? → retry SQL Generation (up to 3 attempts)
-↓
+    ↓
+  error? → retry SQL Generation (up to 3 attempts)
+    ↓
 Recommend (LLM ranks top 2-3 parts with explanations)
-↓
+    ↓
 Stream Response (real token streaming to UI)
+```
 
 ![Graph](graph.png)
 
