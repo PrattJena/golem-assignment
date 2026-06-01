@@ -21,7 +21,26 @@ def bootstrap_app():
     """
     Initialize the inventory database once and import the LangGraph runner
     and streaming chain. Avoids re-syncing on every Streamlit rerun.
+    Handles secrets for Streamlit Cloud deployment.
     """
+    import json
+    import tempfile
+    import os
+
+    # Handle Google service account from Streamlit Secrets
+    if "GOOGLE_SERVICE_ACCOUNT" in st.secrets:
+        creds = json.dumps(dict(st.secrets["GOOGLE_SERVICE_ACCOUNT"]))
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        tmp.write(creds)
+        tmp.close()
+        os.environ["GOOGLE_SHEETS_CREDENTIALS_PATH"] = tmp.name
+
+    # Set env vars from Streamlit Secrets
+    for key in ["OPENAI_API_KEY", "GOOGLE_SHEET_ID", "INVENTORY_DB_PATH",
+                 "LLM_MODEL", "LLM_PROVIDER"]:
+        if key in st.secrets and key not in os.environ:
+            os.environ[key] = st.secrets[key]
+
     init_database()
     from graph.agent import stream_agent
     from graph.chains.stream_response import stream_response_chain
