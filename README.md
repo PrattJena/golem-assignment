@@ -153,7 +153,7 @@ This keeps the LLM prompts reusable while keeping state management inside the gr
 
 The assignment offered a few possible approaches. I chose Option A, where the LLM generates SQL directly from the user’s natural language question.
 
-I considered Option B, where the LLM returns structured filters like category, keywords, or price range and the code builds the SQL. That is safer, but it limits the search to fields I define upfront. I also considered a hybrid approach (Option C) where one step extracts intent and another generates SQL, but that adds another node and LLM call.
+I considered Option B, where the LLM returns structured filters like category, keywords, or price range and the code builds the SQL. That is safer, but it limits the search to fields I define upfront. I also considered a hybrid approach (Option C) where one step extracts intent and another generates SQL but decided to go with A instead.
 
 For this project, Option A felt like the best tradeoff. Auto-parts questions can be vague, like “I’m doing a winter road trip from Boston to Montreal,” where the user may need batteries, wipers, antifreeze, or tires. Letting the LLM generate SQL directly allows it to reason from symptoms to relevant parts in one step, while LangGraph still handles the execution and retry flow around it.
 
