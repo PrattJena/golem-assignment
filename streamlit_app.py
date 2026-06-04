@@ -7,8 +7,6 @@ from typing import Any, Dict
 
 import streamlit as st
 
-from ingestion.sync_catalog import init_database
-
 st.set_page_config(
     page_title="Auto Parts Advisor",
     page_icon="🚗",
@@ -46,7 +44,6 @@ def bootstrap_app():
         if key in st.secrets and key not in os.environ:
             os.environ[key] = st.secrets[key]
 
-    init_database()
     from graph.agent import stream_agent
     from graph.chains.stream_response import stream_response_chain
 

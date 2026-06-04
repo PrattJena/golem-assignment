@@ -5,6 +5,7 @@ import sqlite3
 from dotenv import load_dotenv
 from mcp.server.fastmcp import FastMCP
 from graph.utils.get_inventory_context import get_schema, get_sample_rows
+from ingestion.sync_catalog import init_database
 
 
 load_dotenv()
@@ -80,5 +81,7 @@ def query_inventory(sql: str) -> str:
 
 
 if __name__ == "__main__":
+    init_database()
+    print("Database initialized successfully.")
     transport = os.environ.get("MCP_TRANSPORT", "stdio")
     mcp.run(transport=transport)
