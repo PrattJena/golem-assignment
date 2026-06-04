@@ -48,17 +48,12 @@ Important SQL construction rules:
     """
 
 structured_llm = llm.with_structured_output(SQLQuery)
-schema = get_schema()
-sample_rows = get_sample_rows()
 
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", SYSTEM_PROMPT),
         ("human", "{question}"),
     ]
-).partial(
-    schema=schema,
-    sample_rows=sample_rows,
 )
 
 generate_sql_chain = prompt | structured_llm
