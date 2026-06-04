@@ -5,7 +5,7 @@ load_dotenv()
 from langchain_core.prompts import ChatPromptTemplate
 from pydantic import BaseModel, Field
 
-from graph.utils.get_inventory_context import get_inventory_context
+from graph.utils.get_inventory_context import get_schema, get_sample_rows
 from graph.utils.llm import llm
 
 
@@ -48,16 +48,12 @@ Important SQL construction rules:
     """
 
 structured_llm = llm.with_structured_output(SQLQuery)
-schema, sample_rows = get_inventory_context()
 
 prompt = ChatPromptTemplate.from_messages(
     [
         ("system", SYSTEM_PROMPT),
         ("human", "{question}"),
     ]
-).partial(
-    schema=schema,
-    sample_rows=sample_rows,
 )
 
 generate_sql_chain = prompt | structured_llm

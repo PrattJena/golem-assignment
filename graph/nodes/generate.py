@@ -1,12 +1,52 @@
+import asyncio
 from typing import Any, Dict
+
+from mcp import ClientSession
+from mcp.client.stdio import stdio_client
 
 from graph.chains.generate_sql import generate_sql_chain
 from graph.state import GraphState
+from graph.utils.mcp_client import server_params
+
+
+def _resource_to_text(result: Any) -> str:
+    """
+    Extract plain text from an MCP read_resource result.
+    """
+    if not getattr(result, "contents", None):
+        return ""
+
+    content = result.contents[0]
+
+    if hasattr(content, "text"):
+        return content.text
+
+    return str(content)
+
+
+async def _get_inventory_context_from_mcp() -> tuple[str, str]:
+    """
+    Read inventory schema and sample rows from MCP resources.
+    """
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write) as session:
+            await session.initialize()
+
+            schema_result = await session.read_resource("inventory://schema")
+            sample_rows_result = await session.read_resource("inventory://sample-rows")
+
+            schema = _resource_to_text(schema_result)
+            sample_rows = _resource_to_text(sample_rows_result)
+
+            return schema, sample_rows
 
 
 def generate_sql_node(state: GraphState) -> Dict[str, Any]:
     """
-    Generate SQL query from the resolved question if present. If error_message exists from previous attempt, include it in the question so the LLM can fix the mistake.
+    Generate SQL query from the resolved question if present.
+
+    If error_message exists from a previous attempt, include it in the question
+    so the LLM can fix the mistake.
     """
     question = state.get("resolved_question") or state["question"]
     error_message = state.get("error_message", "")
@@ -17,12 +57,23 @@ def generate_sql_node(state: GraphState) -> Dict[str, Any]:
     if error_message:
         question = f"""{question}
 
-        The previous SQL query failed with this error:
-        Error: {error_message}
-        Please fix the SQL query and try again."""
+The previous SQL query failed with this error:
+Error: {error_message}
+
+Please fix the SQL query and try again.
+"""
 
     try:
-        result = generate_sql_chain.invoke({"question": question})
+        schema, sample_rows = asyncio.run(_get_inventory_context_from_mcp())
+
+        result = generate_sql_chain.invoke(
+            {
+                "question": question,
+                "schema": schema,
+                "sample_rows": sample_rows,
+            }
+        )
+
     except Exception as e:
         return {
             "sql_query": "SELECT * FROM inventory WHERE 1=0",
