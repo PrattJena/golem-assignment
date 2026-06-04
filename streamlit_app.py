@@ -36,10 +36,10 @@ def bootstrap_app():
     # Set env vars from Streamlit Secrets
     for key in [
         "OPENAI_API_KEY",
-        "GOOGLE_SHEET_ID",
-        "INVENTORY_DB_PATH",
         "LLM_MODEL",
         "LLM_PROVIDER",
+        "MCP_TRANSPORT",
+        "MCP_SERVER_URL",
     ]:
         if key in st.secrets and key not in os.environ:
             os.environ[key] = st.secrets[key]
