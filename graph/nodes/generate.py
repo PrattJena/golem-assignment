@@ -1,44 +1,23 @@
 import asyncio
 from typing import Any, Dict
 
-from mcp import ClientSession
-from mcp.client.stdio import stdio_client
-
 from graph.chains.generate_sql import generate_sql_chain
 from graph.state import GraphState
-from graph.utils.mcp_client import server_params
-
-
-def _resource_to_text(result: Any) -> str:
-    """
-    Extract plain text from an MCP read_resource result.
-    """
-    if not getattr(result, "contents", None):
-        return ""
-
-    content = result.contents[0]
-
-    if hasattr(content, "text"):
-        return content.text
-
-    return str(content)
+from graph.utils.mcp_client import get_mcp_session, resource_result_to_text
 
 
 async def _get_inventory_context_from_mcp() -> tuple[str, str]:
     """
     Read inventory schema and sample rows from MCP resources.
     """
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
+    async with get_mcp_session() as session:
+        schema_result = await session.read_resource("inventory://schema")
+        sample_rows_result = await session.read_resource("inventory://sample-rows")
 
-            schema_result = await session.read_resource("inventory://schema")
-            sample_rows_result = await session.read_resource("inventory://sample-rows")
+        schema = resource_result_to_text(schema_result)
+        sample_rows = resource_result_to_text(sample_rows_result)
 
-            schema = _resource_to_text(schema_result)
-            sample_rows = _resource_to_text(sample_rows_result)
-
-            return schema, sample_rows
+        return schema, sample_rows
 
 
 def generate_sql_node(state: GraphState) -> Dict[str, Any]:

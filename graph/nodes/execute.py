@@ -2,39 +2,35 @@ import asyncio
 import json
 from typing import Any, Dict
 
-from mcp import ClientSession
-from mcp.client.stdio import stdio_client
-
 from graph.state import GraphState
-from graph.utils.mcp_client import server_params
+from graph.utils.mcp_client import get_mcp_session, tool_result_to_text
 
 
 async def _call_query_inventory_tool(sql: str) -> dict:
     """
-    Calls the query_inventory tool exposed by the local MCP server.
+    Calls the query_inventory tool exposed by the MCP server.
 
     The MCP server returns a JSON string shaped like:
         {
-            "rows": [...],
+            "rows": [],
             "error": null
         }
     """
-    async with stdio_client(server_params) as (read, write):
-        async with ClientSession(read, write) as session:
-            await session.initialize()
+    async with get_mcp_session() as session:
+        result = await session.call_tool(
+            "query_inventory",
+            {"sql": sql},
+        )
 
-            result = await session.call_tool(
-                "query_inventory",
-                {"sql": sql},
-            )
+        raw_text = tool_result_to_text(result)
 
-            if not result.content:
-                return {
-                    "rows": [],
-                    "error": "MCP tool returned no content.",
-                }
+        if not raw_text:
+            return {
+                "rows": [],
+                "error": "MCP tool returned no content.",
+            }
 
-            return json.loads(result.content[0].text)
+        return json.loads(raw_text)
 
 
 def execute_sql(state: GraphState) -> Dict[str, Any]:

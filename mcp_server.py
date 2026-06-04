@@ -9,7 +9,13 @@ from graph.utils.get_inventory_context import get_schema, get_sample_rows
 
 load_dotenv()
 
-mcp = FastMCP("auto-parts-inventory")
+port = int(os.environ.get("PORT", 8000))
+
+mcp = FastMCP(
+    "auto-parts-inventory",
+    host="0.0.0.0",
+    port=port,
+)
 
 @mcp.resource("inventory://schema")
 def schema() -> str:
@@ -74,4 +80,5 @@ def query_inventory(sql: str) -> str:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    transport = os.environ.get("MCP_TRANSPORT", "stdio")
+    mcp.run(transport=transport)
